@@ -51,3 +51,8 @@ Formatteren forventer det udbredte meshcore→MQTT-layout, hvor topic er `meshco
 ## Bemærk
 
 Pakkeparseren er skrevet efter MeshCore-pakkeformatet (header, path, AES-128-ECB + 2-byte HMAC for gruppebeskeder). Test den mod din egen observer – især `path_len`-kodningen kan variere mellem firmwareversioner.
+
+## Vilkår og privatliv
+
+- [Servicevilkår](TERMS.md)
+- [Privatlivspolitik](PRIVACY.md)
