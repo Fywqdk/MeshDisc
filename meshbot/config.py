@@ -22,6 +22,8 @@ def _routes(name: str) -> dict[str, int]:
     routes = {}
     for item in _list(name):
         channel, _, discord_id = item.rpartition("=")
+        if not channel or not discord_id.isdigit():
+            raise SystemExit(f"{name}: {item!r} skal have formen kanal=discord-kanal-id, fx public=1234567890")
         routes[channel.lstrip("#").lower()] = int(discord_id)
     return routes
 
