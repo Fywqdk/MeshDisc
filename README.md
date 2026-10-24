@@ -1,62 +1,64 @@
 # MeshCore → Discord bot
 
-Lytter på en MeshCore-node (direkte via TCP, fx meshcomod på port 5000, eller en observer via MQTT) og reposter pakker (som standard kanalbeskeder fra *Public*) i en Discord-kanal.
+Listens to a MeshCore node (directly over TCP, e.g. meshcomod on port 5000, or an observer via MQTT) and reposts packets (by default channel messages from *Public*) to a Discord channel.
 
-## Struktur
+## Structure
 
 ```
 meshbot/
   __main__.py         # entrypoint: python -m meshbot
-  config.py           # indstillinger fra .env
-  source.py           # vælger kilde ud fra MESH_SOURCE (tcp/mqtt)
-  tcp_listener.py     # companion-node over TCP (RX log) med auto-reconnect -> asyncio.Queue
-  mqtt_listener.py    # aiomqtt-klient med auto-reconnect -> asyncio.Queue
-  meshcore_decode.py  # parser MeshCore-pakker + dekrypterer GRP_TXT
-  formatters.py       # pakke -> Discord embed (tilføj egne handlers her)
-  bot.py              # discord.py bot, kø-consumer, dedupe, /mesh-kommandoer
+  config.py           # settings from .env
+  source.py           # picks the source from MESH_SOURCE (tcp/mqtt)
+  tcp_listener.py     # companion node over TCP (RX log) with auto-reconnect -> asyncio.Queue
+  mqtt_listener.py    # aiomqtt client with auto-reconnect -> asyncio.Queue
+  meshcore_decode.py  # parses MeshCore packets + decrypts GRP_TXT
+  formatters.py       # packet -> Discord embed (add your own handlers here)
+  bot.py              # discord.py bot, queue consumer, dedupe, /mesh commands
 ```
 
-Flow: `TCP/MQTT → queue → parse → filter (POST_TYPES) → dedupe → dekrypter → embed → Discord`
+Flow: `TCP/MQTT → queue → parse → filter (POST_TYPES) → dedupe → decrypt → embed → Discord`
 
-## Opsætning
+## Setup
 
-1. Opret en bot på <https://discord.com/developers/applications>, kopiér token, og invitér den med scopes `bot` + `applications.commands` og rettigheden *Send Messages* / *Embed Links*.
-2. Slå *Developer Mode* til i Discord, højreklik kanalen → *Copy Channel ID*.
-3. Installer og konfigurer:
+1. Create a bot at <https://discord.com/developers/applications>, copy the token, and invite it with the scopes `bot` + `applications.commands` and the permissions *Send Messages* / *Embed Links*.
+2. Enable *Developer Mode* in Discord, right-click the channel → *Copy Channel ID*.
+3. Install and configure:
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # udfyld token, kanal-id og MESH_HOST (eller MQTT)
+cp .env.example .env   # fill in token, channel ID and MESH_HOST (or MQTT)
 python -m meshbot
 ```
 
-## Kommandoer
+## Commands
 
-- `/mesh status` – statistik (modtaget, postet, dubletter, kø)
-- `/mesh pause` – pause/genoptag reposting (kræver *Manage Channels*)
+- `/mesh status` – statistics (received, posted, duplicates, queue)
+- `/mesh pause` – pause/resume reposting (requires *Manage Channels*)
 
-Se [SETUP.md](SETUP.md) for en trin-for-trin-guide.
+See [SETUP.md](SETUP.md) for a step-by-step guide (in Danish).
 
-## Observer-format (MQTT)
+## Observer format (MQTT)
 
-Formatteren forventer det udbredte meshcore→MQTT-layout, hvor topic er `meshcore/<IATA>/<pubkey>/packets` og payload er JSON med et `raw`-felt (hex af hele pakken) samt evt. `SNR`, `RSSI`, `hash`, `origin`. Publicerer din observer anderledes, så ret `extract_raw_hex()` og feltnavnene i `formatters.py`. Sæt `POST_RAW=true` og `POST_TYPES=*` for at se hvad der faktisk kommer ind.
+The formatter expects the common meshcore→MQTT layout, where the topic is `meshcore/<IATA>/<pubkey>/packets` and the payload is JSON with a `raw` field (hex of the whole packet) plus optionally `SNR`, `RSSI`, `hash`, `origin`. If your observer publishes differently, adjust `extract_raw_hex()` and the field names in `formatters.py`. Set `POST_RAW=true` and `POST_TYPES=*` to see what actually comes in.
 
-## Udvidelse
+## Extending
 
-- **Ny pakketype:** skriv en `fmt_xxx(pkt, data, topic)` i `formatters.py` og tilføj den i `HANDLERS`.
-- **Private kanaler:** tilføj `CHANNEL_KEYS=public,Klub=<32 hex-tegn>`.
-- **Flere Discord-kanaler / routing:** udvid `_consumer()` i `bot.py` til at vælge kanal ud fra `pkt.channel` eller topic.
+- **New packet type:** write a `fmt_xxx(pkt, data, topic)` in `formatters.py` and add it to `HANDLERS`.
+- **Private channels:** add `CHANNEL_KEYS=public,Club=<32 hex chars>`.
+- **Hashtag channels** (e.g. `#test`): the key is the first 16 bytes of SHA-256 of the channel name including `#`:
+  `printf '%s' '#test' | sha256sum | cut -c1-32`
+- **Multiple Discord channels / routing:** extend `_consumer()` in `bot.py` to choose a channel based on `pkt.channel` or the topic.
 
-## Bemærk
+## Note
 
-Pakkeparseren er skrevet efter MeshCore-pakkeformatet (header, path, AES-128-ECB + 2-byte HMAC for gruppebeskeder). Test den mod din egen observer – især `path_len`-kodningen kan variere mellem firmwareversioner.
+The packet parser follows the MeshCore packet format (header, path, AES-128-ECB + 2-byte HMAC for group messages). It has been tested against a Heltec V4 running firmware v1.18; test it against your own node, as the path encoding in particular can vary between firmware versions.
 
-## Vilkår og privatliv
+## Terms and privacy
 
-- [Servicevilkår](TERMS.md)
-- [Privatlivspolitik](PRIVACY.md)
+- [Terms of Service](TERMS.md)
+- [Privacy Policy](PRIVACY.md)
 
-## Licens
+## License
 
 [MIT](LICENSE)
