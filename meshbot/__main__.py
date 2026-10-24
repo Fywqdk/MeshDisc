@@ -14,7 +14,11 @@ def main() -> None:
         level=cfg.log_level.upper(),
         format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
     )
-    MeshBot(cfg).run(cfg.discord_token, log_handler=None)
+    try:
+        bot = MeshBot(cfg)
+    except ValueError as e:
+        raise SystemExit(f"CHANNEL_KEYS: {e}")
+    bot.run(cfg.discord_token, log_handler=None)
 
 
 if __name__ == "__main__":

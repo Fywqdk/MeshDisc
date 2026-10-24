@@ -54,7 +54,14 @@ class Channel:
         name, _, key = value.rpartition("=")
         if key.lower() == "public":
             return cls(name or "Public", bytes.fromhex(PUBLIC_CHANNEL_KEY))
-        return cls(name or f"ch-{key[:4]}", bytes.fromhex(key))
+        try:
+            secret = bytes.fromhex(key)
+        except ValueError:
+            secret = b""
+        if len(secret) != 16:
+            hint = f" (mente du #{value}?)" if not name else ""
+            raise ValueError(f"Ugyldig kanal {value!r}{hint}: brug public, #hashtag eller navn=<32 hex-tegn>")
+        return cls(name or f"ch-{key[:4]}", secret)
 
 
 @dataclass
