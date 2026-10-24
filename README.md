@@ -56,3 +56,7 @@ Pakkeparseren er skrevet efter MeshCore-pakkeformatet (header, path, AES-128-ECB
 
 - [Servicevilkår](TERMS.md)
 - [Privatlivspolitik](PRIVACY.md)
+
+## Licens
+
+[MIT](LICENSE)
