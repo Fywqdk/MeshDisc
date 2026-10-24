@@ -1,40 +1,40 @@
-# Privatlivspolitik for MeshDisc
+# MeshDisc Privacy Policy
 
-*Gældende fra 24. oktober 2026*
+*Effective October 24, 2026*
 
-Denne politik beskriver, hvilke data Discord-botten MeshDisc behandler. Kort sagt: botten gemmer ingen personoplysninger om Discord-brugere.
+This policy describes what data the MeshDisc Discord bot processes. In short: the bot does not store any personal data about Discord users.
 
-## Data fra Discord
+## Data from Discord
 
-- Botten bruger kun Discords standard-intents og har **ikke** adgang til indholdet af beskeder skrevet i Discord.
-- Når du bruger `/mesh status` eller `/mesh pause`, behandler botten kommandoen og svarer kun dig. Dit bruger-ID, navn eller andre oplysninger gemmes ikke.
-- Botten kender navnet og ID'et på de servere og kanaler, den er inviteret til, for at kunne poste. Det gemmes ikke ud over den kørende proces.
+- The bot only uses Discord's default intents and does **not** have access to the content of messages written in Discord.
+- When you use `/mesh status` or `/mesh pause`, the bot processes the command and replies only to you. Your user ID, name and other details are not stored.
+- The bot knows the names and IDs of the servers and channels it has been invited to, so that it can post. These are not kept beyond the running process.
 
-## Data fra MeshCore-netværket
+## Data from the MeshCore network
 
-Botten modtager radiopakker, som en MeshCore-node hører. For beskeder i kanaler, den er sat op til at læse, poster den i Discord:
+The bot receives radio packets heard by a MeshCore node. For messages in channels it is configured to read, it posts the following to Discord:
 
-- afsenderens navn, som afsenderen selv har valgt på sin node
-- beskedens tekst og tidspunkt
-- kanalens navn
-- tekniske oplysninger: signalstyrke (SNR/RSSI), antal hop og rutens repeater-ID'er
+- the sender's name, as chosen by the sender on their own node
+- the message text and time
+- the channel name
+- technical details: signal strength (SNR/RSSI), hop count and the repeater IDs along the route
 
-Det er beskeder sendt i kanaler, som alle med kanalens navn eller nøgle kan læse. Beskeder i kanaler, botten ikke har nøglen til, samt direkte beskeder, kan ikke læses og postes ikke.
+These are messages sent in channels that anyone with the channel name or key can read. Messages in channels the bot has no key for, as well as direct messages, cannot be read and are not posted.
 
-## Opbevaring
+## Retention
 
-- Botten har ingen database. Statistik og et kortvarigt dublet-filter (som standard 60 sekunder) ligger kun i hukommelsen og forsvinder ved genstart.
-- Driftslogs kan indeholde tekniske fejlbeskeder, men ikke Discord-brugeres oplysninger.
-- Beskeder, der er postet i Discord, opbevares af Discord efter [Discords privatlivspolitik](https://discord.com/privacy) og kan slettes af serverens moderatorer.
+- The bot has no database. Statistics and a short-lived duplicate filter (60 seconds by default) are kept in memory only and are lost on restart.
+- Operational logs may contain technical error messages, but no data about Discord users.
+- Messages posted to Discord are stored by Discord under the [Discord Privacy Policy](https://discord.com/privacy) and can be deleted by the server's moderators.
 
-## Deling
+## Sharing
 
-Data sælges eller deles ikke med tredjepart. Ud over Discord sendes intet nogen steder hen.
+Data is not sold or shared with third parties. Nothing is sent anywhere other than Discord.
 
-## Dine rettigheder
+## Your rights
 
-Ønsker du en besked fjernet fra Discord-kanalen, så kontakt serverens moderatorer. Spørgsmål om denne politik kan stilles ved at oprette et issue på [github.com/Fywqdk/MeshDisc](https://github.com/Fywqdk/MeshDisc/issues).
+If you want a message removed from the Discord channel, contact the server's moderators. Questions about this policy can be raised by opening an issue at [github.com/Fywqdk/MeshDisc](https://github.com/Fywqdk/MeshDisc/issues).
 
-## Ændringer
+## Changes
 
-Politikken kan blive opdateret. Den gældende version findes altid i dette repository, og ændringer kan ses i historikken.
+This policy may be updated. The current version is always available in this repository, and changes can be seen in its history.

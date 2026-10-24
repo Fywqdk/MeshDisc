@@ -1,33 +1,33 @@
-# Servicevilkår for MeshDisc
+# MeshDisc Terms of Service
 
-*Gældende fra 24. oktober 2026*
+*Effective October 24, 2026*
 
-MeshDisc er en Discord-bot, der videresender beskeder fra MeshCore-radionetværket til en Discord-kanal. Ved at invitere botten til en server eller bruge dens kommandoer accepterer du disse vilkår.
+MeshDisc is a Discord bot that relays messages from the MeshCore radio network to a Discord channel. By inviting the bot to a server or using its commands, you agree to these terms.
 
-## Hvad botten gør
+## What the bot does
 
-- Lytter på en MeshCore-node og poster beskeder fra udvalgte kanaler i én bestemt Discord-kanal.
-- Tilbyder kommandoerne `/mesh status` (statistik) og `/mesh pause` (pause/genoptag, kræver *Manage Channels*).
-- Botten sender ikke noget ud på MeshCore-netværket og læser ikke beskeder skrevet i Discord.
+- Listens to a MeshCore node and posts messages from selected mesh channels to one specific Discord channel.
+- Provides the commands `/mesh status` (statistics) and `/mesh pause` (pause/resume, requires *Manage Channels*).
+- The bot does not transmit anything on the MeshCore network and does not read messages written in Discord.
 
-## Brug
+## Use
 
-- Botten må kun bruges i overensstemmelse med [Discords servicevilkår](https://discord.com/terms) og [retningslinjer for fællesskabet](https://discord.com/guidelines).
-- Indhold, der postes, stammer fra radiobeskeder sendt af tredjepart. Ansvaret for indholdet ligger hos afsenderen, og moderation af kanalen ligger hos serverens administratorer.
-- Du må ikke forsøge at misbruge, overbelaste eller omgå begrænsninger i botten.
+- The bot may only be used in accordance with the [Discord Terms of Service](https://discord.com/terms) and [Community Guidelines](https://discord.com/guidelines).
+- Posted content originates from radio messages sent by third parties. The sender is responsible for the content, and moderating the channel is up to the server's administrators.
+- You may not attempt to abuse, overload or circumvent limitations of the bot.
 
-## Ingen garanti
+## No warranty
 
-Botten er et hobbyprojekt og leveres "som den er" uden garanti for oppetid, fuldstændighed eller korrekthed. Beskeder kan gå tabt, blive forsinket eller blive vist forkert. Udvikleren er ikke ansvarlig for tab eller skade som følge af brug af botten.
+The bot is a hobby project provided "as is", without any warranty of uptime, completeness or accuracy. Messages may be lost, delayed or displayed incorrectly. The developer is not liable for any loss or damage resulting from use of the bot.
 
-## Ophør
+## Termination
 
-Botten kan til enhver tid fjernes fra en server af serverens administratorer. Udvikleren kan stoppe tjenesten eller udelukke servere uden varsel.
+Server administrators can remove the bot from their server at any time. The developer may discontinue the service or exclude servers without notice.
 
-## Ændringer
+## Changes
 
-Vilkårene kan blive opdateret. Den gældende version findes altid i dette repository, og ændringer kan ses i historikken.
+These terms may be updated. The current version is always available in this repository, and changes can be seen in its history.
 
-## Kontakt
+## Contact
 
-Spørgsmål kan stilles ved at oprette et issue på [github.com/Fywqdk/MeshDisc](https://github.com/Fywqdk/MeshDisc/issues).
+Questions can be raised by opening an issue at [github.com/Fywqdk/MeshDisc](https://github.com/Fywqdk/MeshDisc/issues).
