@@ -1,0 +1,7 @@
+# The observer node may only publish to meshcore/...
+user observer
+topic write meshcore/#
+
+# The Discord bot may only read
+user discordbot
+topic read meshcore/#

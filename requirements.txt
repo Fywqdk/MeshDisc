@@ -1,0 +1,5 @@
+discord.py>=2.4
+aiomqtt>=2.3
+cryptography>=42
+python-dotenv>=1.0
+meshcore>=2.3

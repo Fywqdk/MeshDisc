@@ -1,0 +1,22 @@
+services:
+  # Kun nødvendig ved MESH_SOURCE=mqtt:  docker compose --profile mqtt up -d
+  mosquitto:
+    image: eclipse-mosquitto:2
+    profiles: ["mqtt"]
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - mosquitto-data:/mosquitto/data
+
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MQTT_HOST: mosquitto   # overrides .env inside the compose network (MQTT mode)
+      MQTT_PORT: "1883"
+
+volumes:
+  mosquitto-data:
