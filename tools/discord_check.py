@@ -38,24 +38,33 @@ def main() -> None:
             if not cfg.discord_channel_id:
                 print("✗ DISCORD_CHANNEL_ID mangler i .env")
                 return
-            try:
-                ch = client.get_channel(cfg.discord_channel_id) or await client.fetch_channel(cfg.discord_channel_id)
-            except (discord.NotFound, discord.Forbidden) as e:
-                print(f"✗ Kan ikke se kanal {cfg.discord_channel_id}: {e}")
-                return
-            print(f"✓ Kanal: #{ch.name} på {ch.guild.name}")
-            perms = ch.permissions_for(ch.guild.me)
-            missing = [p for p in REQUIRED if not getattr(perms, p)]
-            if missing:
-                print(f"✗ Mangler rettigheder i kanalen: {', '.join(missing)}")
-                return
-            print(f"✓ Rettigheder OK ({', '.join(REQUIRED)})")
-            if not args.no_send:
-                e = discord.Embed(description="Testbesked fra MeshCore-botten ✅", color=0x2ECC71)
-                e.set_author(name="discord_check")
-                msg = await ch.send(embed=e)
-                print(f"✓ Testbesked sendt: {msg.jump_url}")
-            result["ok"] = True
+            # Default channel first, then one per routed mesh channel
+            targets: dict[int, list[str]] = {cfg.discord_channel_id: ["alt andet"]}
+            for mesh_name, channel_id in cfg.discord_routes.items():
+                targets.setdefault(channel_id, []).append(f"#{mesh_name}")
+            ok = True
+            for channel_id, labels in targets.items():
+                label = ", ".join(labels)
+                try:
+                    ch = client.get_channel(channel_id) or await client.fetch_channel(channel_id)
+                except (discord.NotFound, discord.Forbidden) as e:
+                    print(f"✗ Kan ikke se kanal {channel_id} ({label}): {e}")
+                    ok = False
+                    continue
+                print(f"✓ Kanal: #{ch.name} på {ch.guild.name} ← {label}")
+                perms = ch.permissions_for(ch.guild.me)
+                missing = [p for p in REQUIRED if not getattr(perms, p)]
+                if missing:
+                    print(f"✗ Mangler rettigheder i #{ch.name}: {', '.join(missing)}")
+                    ok = False
+                    continue
+                print(f"✓ Rettigheder OK ({', '.join(REQUIRED)})")
+                if not args.no_send:
+                    e = discord.Embed(description=f"Testbesked fra MeshCore-botten ✅ ({label})", color=0x2ECC71)
+                    e.set_author(name="discord_check")
+                    msg = await ch.send(embed=e)
+                    print(f"✓ Testbesked sendt: {msg.jump_url}")
+            result["ok"] = ok
         finally:
             await client.close()
 

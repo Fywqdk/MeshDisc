@@ -1,0 +1,15 @@
+[Unit]
+Description=MeshDisc - MeshCore to Discord bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=meshdisc
+WorkingDirectory=/opt/meshdisc
+ExecStart=/opt/meshdisc/.venv/bin/python -m meshbot
+Restart=always
+RestartSec=10
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

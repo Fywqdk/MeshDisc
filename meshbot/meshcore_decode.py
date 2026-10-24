@@ -47,7 +47,10 @@ class Channel:
 
     @classmethod
     def from_config(cls, value: str) -> "Channel":
-        # Accept "public", "hexkey" or "name=hexkey"
+        # Accept "public", "#hashtag", "hexkey" or "name=hexkey"
+        if value.startswith("#"):
+            # Hashtag channels derive their secret from the name, e.g. "#test"
+            return cls(value[1:], hashlib.sha256(value.encode()).digest()[:16])
         name, _, key = value.rpartition("=")
         if key.lower() == "public":
             return cls(name or "Public", bytes.fromhex(PUBLIC_CHANNEL_KEY))

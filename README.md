@@ -31,6 +31,45 @@ cp .env.example .env   # fill in token, channel ID and MESH_HOST (or MQTT)
 python -m meshbot
 ```
 
+## Channels and routing
+
+`CHANNEL_KEYS` lists the mesh channels the bot decrypts. Messages in other channels are ignored.
+
+```ini
+CHANNEL_KEYS=#test,#danmark,Club=00112233445566778899aabbccddeeff
+```
+
+- `public` – the default Public channel
+- `#name` – a hashtag channel; the key is derived from the name
+- `name=<32 hex chars>` – a private channel with its secret key
+
+`DISCORD_ROUTES` sends each mesh channel to its own Discord channel. Anything not listed goes to `DISCORD_CHANNEL_ID`.
+
+```ini
+DISCORD_CHANNEL_ID=1563524626397663302
+DISCORD_ROUTES=test=1563524626397663302,danmark=1563500000000000000
+```
+
+Run `python -m tools.discord_check --no-send` to verify the bot can post in every configured channel.
+
+## Running as a service (Proxmox LXC / Debian)
+
+In a Debian 12 or Ubuntu 24.04 container, as root:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Fywqdk/MeshDisc/main/deploy/install.sh -o install.sh
+bash install.sh
+```
+
+The script installs the bot in `/opt/meshdisc` as a systemd service running as the `meshdisc` user. Fill in `/opt/meshdisc/.env`, then:
+
+```bash
+systemctl start meshdisc
+journalctl -u meshdisc -f
+```
+
+To update later, run `bash /opt/meshdisc/deploy/install.sh` again.
+
 ## Commands
 
 - `/mesh status` – statistics (received, posted, duplicates, queue)
@@ -45,10 +84,7 @@ The formatter expects the common meshcore→MQTT layout, where the topic is `mes
 ## Extending
 
 - **New packet type:** write a `fmt_xxx(pkt, data, topic)` in `formatters.py` and add it to `HANDLERS`.
-- **Private channels:** add `CHANNEL_KEYS=public,Club=<32 hex chars>`.
-- **Hashtag channels** (e.g. `#test`): the key is the first 16 bytes of SHA-256 of the channel name including `#`:
-  `printf '%s' '#test' | sha256sum | cut -c1-32`
-- **Multiple Discord channels / routing:** extend `_consumer()` in `bot.py` to choose a channel based on `pkt.channel` or the topic.
+- **Custom routing:** change `target_channel_id()` in `bot.py`, e.g. to route by packet type or topic.
 
 ## Note
 

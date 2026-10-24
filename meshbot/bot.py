@@ -12,7 +12,7 @@ from discord.ext import commands
 
 from .config import Config
 from .formatters import extract_raw_hex, format_packet, format_raw
-from .meshcore_decode import Channel, decrypt_grp_txt, parse_packet
+from .meshcore_decode import Channel, Packet, decrypt_grp_txt, parse_packet
 from .mqtt_listener import MqttEvent
 from .source import run_source
 
@@ -51,45 +51,59 @@ class MeshBot(commands.Bot):
     def _allowed(self, ptype: str) -> bool:
         return "*" in self.allowed_types or ptype in self.allowed_types
 
-    def build_embed(self, ev: MqttEvent) -> discord.Embed | None:
-        """Return an embed for this event, or None to skip it."""
+    def _prepare(self, ev: MqttEvent) -> tuple[Packet | None, discord.Embed | None]:
+        """Return the parsed packet (if any) and an embed for this event, or None to skip it."""
         raw_hex = extract_raw_hex(ev.data) if ev.data else None
         if not raw_hex:
             if self.cfg.post_raw:
                 text = json.dumps(ev.data, indent=1) if ev.data else ev.raw.decode(errors="replace")
-                return format_raw(ev.topic, text)
-            return None
+                return None, format_raw(ev.topic, text)
+            return None, None
         try:
             pkt = parse_packet(bytes.fromhex(raw_hex))
         except (ValueError, IndexError) as e:
             log.debug("Could not parse packet on %s: %s", ev.topic, e)
-            return None
+            return None, None
         if not self._allowed(pkt.payload_type):
-            return None
+            return pkt, None
         # Same packet heard by several observers/paths -> post once
         dedupe_key = (ev.data.get("hash") or "") + pkt.payload.hex()
         if self._is_dupe(dedupe_key):
             self.stats["dupes"] += 1
-            return None
+            return pkt, None
         decrypt_grp_txt(pkt, self.channels)
-        return format_packet(pkt, ev.data, ev.topic)
+        return pkt, format_packet(pkt, ev.data, ev.topic)
+
+    def build_embed(self, ev: MqttEvent) -> discord.Embed | None:
+        """Return an embed for this event, or None to skip it."""
+        return self._prepare(ev)[1]
+
+    def target_channel_id(self, pkt: Packet | None) -> int:
+        """Discord channel for a packet: its mesh channel's route, else the default channel."""
+        name = (pkt.channel or "").lower() if pkt else ""
+        return self.cfg.discord_routes.get(name, self.cfg.discord_channel_id)
+
+    async def _discord_channel(self, channel_id: int) -> discord.abc.Messageable:
+        return self.get_channel(channel_id) or await self.fetch_channel(channel_id)
 
     async def _consumer(self) -> None:
         await self.wait_until_ready()
-        channel = self.get_channel(self.cfg.discord_channel_id) or await self.fetch_channel(
-            self.cfg.discord_channel_id
-        )
-        log.info("Posting to #%s", getattr(channel, "name", channel.id))
+        for mesh_name, channel_id in self.cfg.discord_routes.items():
+            channel = await self._discord_channel(channel_id)
+            log.info("Routing #%s to Discord #%s", mesh_name, getattr(channel, "name", channel_id))
+        channel = await self._discord_channel(self.cfg.discord_channel_id)
+        log.info("Posting everything else to #%s", getattr(channel, "name", channel.id))
         while True:
             ev = await self.queue.get()
             self.stats["rx"] += 1
             if self.paused:
                 continue
             try:
-                embed = self.build_embed(ev)
+                pkt, embed = self._prepare(ev)
                 if embed is None:
                     self.stats["skipped"] += 1
                     continue
+                channel = await self._discord_channel(self.target_channel_id(pkt))
                 await channel.send(embed=embed)  # discord.py handles rate limits
                 self.stats["posted"] += 1
             except Exception:

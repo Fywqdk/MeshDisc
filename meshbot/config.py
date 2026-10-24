@@ -17,11 +17,22 @@ def _list(name: str, default: str = "") -> list[str]:
     return [x.strip() for x in os.getenv(name, default).split(",") if x.strip()]
 
 
+def _routes(name: str) -> dict[str, int]:
+    """Parse "test=123,#danmark=456" into {"test": 123, "danmark": 456}."""
+    routes = {}
+    for item in _list(name):
+        channel, _, discord_id = item.rpartition("=")
+        routes[channel.lstrip("#").lower()] = int(discord_id)
+    return routes
+
+
 @dataclass
 class Config:
     # Discord
     discord_token: str = field(default_factory=lambda: os.getenv("DISCORD_TOKEN", ""))
     discord_channel_id: int = field(default_factory=lambda: int(os.getenv("DISCORD_CHANNEL_ID") or 0))
+    # Mesh channel name -> Discord channel ID. Anything not listed goes to DISCORD_CHANNEL_ID.
+    discord_routes: dict[str, int] = field(default_factory=lambda: _routes("DISCORD_ROUTES"))
 
     # Where packets come from: "tcp" (companion node, e.g. meshcomod) or "mqtt" (observer via broker)
     source: str = field(default_factory=lambda: os.getenv("MESH_SOURCE", "tcp").strip().lower())
@@ -40,7 +51,8 @@ class Config:
     # Behaviour
     # Which MeshCore payload types to post: e.g. "GRP_TXT,ADVERT" or "*" for everything
     post_types: list[str] = field(default_factory=lambda: _list("POST_TYPES", "GRP_TXT"))
-    # Channel secrets (hex, 16 bytes) used to decrypt group messages. "public" = default Public channel key.
+    # Channel secrets (hex, 16 bytes) used to decrypt group messages. "public" = default Public channel key,
+    # "#name" = hashtag channel (key derived from the name).
     channel_keys: list[str] = field(default_factory=lambda: _list("CHANNEL_KEYS", "public"))
     # Seconds to remember packet hashes (dedupe when several observers hear the same packet)
     dedupe_seconds: int = field(default_factory=lambda: int(os.getenv("DEDUPE_SECONDS", "60")))
